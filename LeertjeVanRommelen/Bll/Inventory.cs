@@ -9,15 +9,20 @@ namespace LeertjeVanRommelen.Bll
     internal class Inventory : IImportInventory
     {
         private readonly IDbSet<Product> _products;
+        private Lazy<Dictionary<int, VAT>> _vatsByPercentage;
 
-        public Inventory(IDbSet<Product> products)
+        public Inventory(IDbSet<Product> products, IEnumerable<VAT> vats)
         {
             _products = products;
+            _vatsByPercentage = new Lazy<Dictionary<int, VAT>>(() => vats.ToDictionary(x => x.Percentage));
         }
 
         public void Import(IInventoryImportDataSource importDataSource)
         {
-            var productsToImport = importDataSource.GetInventoryDataToImport()
+            var inventoryItemsToImport = importDataSource.GetInventoryDataToImport().ToArray();
+
+
+            var productsToImport = inventoryItemsToImport
                 .Select(MapProduct)
                 .ToArray();
 
@@ -42,8 +47,10 @@ namespace LeertjeVanRommelen.Bll
             return MapDataFromImportItem(product, item);
         }
 
-        private static Product MapDataFromImportItem(Product product, InventoryImportDataItem item)
+        private Product MapDataFromImportItem(Product product, InventoryImportDataItem item)
         {
+            MapVat(product, item);
+
             product.Price = item.Price*0.15m;
             product.Sku = item.Sku;
             product.ShortDescription = item.ShortDescription;
@@ -52,6 +59,15 @@ namespace LeertjeVanRommelen.Bll
             product.Model = item.Model;
 
             return product;
+        }
+
+        private void MapVat(Product product, InventoryImportDataItem item)
+        {
+            VAT vat;
+            if (_vatsByPercentage.Value.TryGetValue(item.VAT, out vat))
+            {
+                product.VATId = vat.Id;
+            }
         }
 
         private Product CreateProductWithDefaultValues()

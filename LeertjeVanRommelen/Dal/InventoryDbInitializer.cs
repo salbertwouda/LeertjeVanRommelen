@@ -18,7 +18,7 @@ namespace LeertjeVanRommelen.Dal
         {
             base.Seed(context);
 
-            context.Vats.Add(new VAT {Name = "Normaal", Percentage = 0.21m});
+            context.Vats.Add(new VAT {Name = "Normaal", Percentage = 2100});
         }
     }
 }

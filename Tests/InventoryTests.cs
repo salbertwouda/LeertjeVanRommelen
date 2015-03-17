@@ -20,6 +20,7 @@ namespace Tests
         private Mock<IInventoryImportDataSource> _importDataSource;
         private Fixture _fixture;
         private List<Product> _products;
+        private List<VAT> _vats;
 
         [SetUp]
         public void Setup()
@@ -28,18 +29,20 @@ namespace Tests
             _productSet = new Mock<IDbSet<Product>>();
 
             _products = new List<Product>();
+            
             var productsQueryable = _products.AsQueryable();
-
             _productSet.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productsQueryable.Provider);
             _productSet.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productsQueryable.Expression);
             _productSet.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productsQueryable.ElementType);
-            _productSet.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productsQueryable.GetEnumerator()); 
-            
+            _productSet.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productsQueryable.GetEnumerator());
+
+            _vats = new List<VAT>();
+
             _importData= new List<InventoryImportDataItem>();
             _importDataSource = new Mock<IInventoryImportDataSource>();
             _importDataSource.Setup(x => x.GetInventoryDataToImport()).Returns(_importData);
             
-            _subject = new Inventory(_productSet.Object);
+            _subject = new Inventory(_productSet.Object, _vats);
         }
 
         public SetDefaultDataTestCase[] GetSetDefaultDataTestCases()
@@ -168,6 +171,25 @@ namespace Tests
                 var capturedProduct = productToRemove;
                 _productSet.Verify(x => x.Remove(capturedProduct), Times.Once);
             }
+        }
+
+        [Test]
+        public void WhenImportItemHasExistingVat_ThenSetVatIdOnProduct()
+        {
+            const int percentage = 16;
+            const int vatId = int.MaxValue;
+            _vats.Add(new VAT
+            {
+                Id=vatId,
+                Percentage = percentage
+            });
+
+            var item = Arrange_AddOneImportDataItem();
+            item.VAT = percentage;
+
+            Import();
+
+            AssertAddProductOnce(x => x.VATId == vatId);
         }
     }
 }
