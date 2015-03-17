@@ -56,7 +56,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bll\IImportInventory.cs" />
+    <Compile Include="Bll\IInventoryImportDataSource.cs" />
+    <Compile Include="Bll\Inventory.cs" />
+    <Compile Include="Bll\InventoryImportDataItem.cs" />
     <Compile Include="Dal\Category.cs" />
+    <Compile Include="Dal\DbSetExtensions.cs" />
     <Compile Include="Dal\Entity.cs" />
     <Compile Include="Dal\File.cs" />
     <Compile Include="Dal\InventoryContext.cs" />

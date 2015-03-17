@@ -13,5 +13,12 @@ namespace LeertjeVanRommelen.Dal
             context.Database.Log = x => Debug.WriteLine(x);
 #endif
         }
+
+        protected override void Seed(InventoryContext context)
+        {
+            base.Seed(context);
+
+            context.Vats.Add(new VAT {Name = "Normaal", Percentage = 0.21m});
+        }
     }
 }

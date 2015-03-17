@@ -9,6 +9,7 @@ namespace LeertjeVanRommelen.Dal
         {
         }
         public IDbSet<Product> Products { get; set; }
+        public IDbSet<VAT> Vats { get; set; }
 
         static InventoryContext()
         {
