@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using LeertjeVanRommelen.Bll;
 using LeertjeVanRommelen.Dal;
+using LeertjeVanRommelen.DataSources;
 
 namespace LeertjeVanRommelen
 {
@@ -12,13 +10,33 @@ namespace LeertjeVanRommelen
     {
         static void Main(string[] args)
         {
+            do
+            {
+                var fileinfo = new FileInfo("Leverancier.csv");
+                ImportCsvFile(fileinfo);
+            } while (Console.ReadLine() != "exit");
+        }
 
+        private static void ImportCsvFile(FileInfo fileinfo)
+        {
+            if (!fileinfo.Exists)
+            {
+                Console.WriteLine("File {0} does not exist, nothing to import", fileinfo.FullName);
+                return;
+            }
+            var dataSource = new CsvFileInventoryImportDataSource(fileinfo);
+            ImportInventory(dataSource);
+        }
+
+        private static void ImportInventory(CsvFileInventoryImportDataSource dataSource)
+        {
             using (var context = new InventoryContext())
             {
-                Console.WriteLine("amount of products: "+context.Products.Count());
-            }
+                var inventory = new Inventory(context.Products, context.Vats);
+                inventory.Import(dataSource);
 
-            Console.ReadKey();
+                context.SaveChanges();
+            }
         }
     }
 }

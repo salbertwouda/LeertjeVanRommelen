@@ -9,7 +9,7 @@ namespace LeertjeVanRommelen.Bll
     internal class Inventory : IImportInventory
     {
         private readonly IDbSet<Product> _products;
-        private Lazy<Dictionary<int, VAT>> _vatsByPercentage;
+        private readonly Lazy<Dictionary<int, VAT>> _vatsByPercentage;
 
         public Inventory(IDbSet<Product> products, IEnumerable<VAT> vats)
         {
@@ -29,12 +29,16 @@ namespace LeertjeVanRommelen.Bll
             var skusToRemove = productsToImport.Select(x => x.Sku).ToArray();
             RemoveProductsWithSkus(skusToRemove);
 
+            Console.WriteLine("Importing {0} new products", productsToImport.Count());
             _products.AddRange(productsToImport);
         }
 
         private void RemoveProductsWithSkus(IEnumerable<string> skusToRemove)
         {
             var productsToRemove = _products.Where(x => skusToRemove.Contains(x.Sku));
+            
+            Console.WriteLine("Deleting {0} old products", productsToRemove.Count());
+
             foreach (var productToRemove in productsToRemove)
             {
                 _products.Remove(productToRemove);

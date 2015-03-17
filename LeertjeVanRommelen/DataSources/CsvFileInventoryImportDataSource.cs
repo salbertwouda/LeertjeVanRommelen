@@ -8,7 +8,7 @@ using LeertjeVanRommelen.Bll;
 
 namespace LeertjeVanRommelen.DataSources
 {
-    class CsvFileInventoryImportDataSource : IInventoryImportDataSource
+    internal class CsvFileInventoryImportDataSource : IInventoryImportDataSource
     {
         private readonly FileInfo _fileInfo;
 
