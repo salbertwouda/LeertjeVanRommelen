@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Linq;
 using System.Linq.Expressions;
 using LeertjeVanRommelen.Bll;
 using LeertjeVanRommelen.Dal;
@@ -18,12 +19,21 @@ namespace Tests
         private List<InventoryImportDataItem> _importData;
         private Mock<IInventoryImportDataSource> _importDataSource;
         private Fixture _fixture;
+        private List<Product> _products;
 
         [SetUp]
         public void Setup()
         {
             _fixture = new Fixture();
             _productSet = new Mock<IDbSet<Product>>();
+
+            _products = new List<Product>();
+            var productsQueryable = _products.AsQueryable();
+
+            _productSet.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productsQueryable.Provider);
+            _productSet.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productsQueryable.Expression);
+            _productSet.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productsQueryable.ElementType);
+            _productSet.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productsQueryable.GetEnumerator()); 
             
             _importData= new List<InventoryImportDataItem>();
             _importDataSource = new Mock<IInventoryImportDataSource>();
@@ -127,6 +137,37 @@ namespace Tests
         private void AssertAddProductOnce(Expression<Func<Product, bool>> predicate)
         {
             _productSet.Verify(x => x.Add(It.Is(predicate)), Times.Once);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(100)]
+        public void WhenImportingExistingProducts_ThenRemoveThoseProductsFromDbSet(int amountOfExistingProducts)
+        {
+            var items = Enumerable.Range(0, amountOfExistingProducts).Select(x => {
+                var item = Arrange_AddOneImportDataItem();
+                item.Sku = "sku" + x;
+                return item;
+            }).ToArray();
+
+            var productsToRemove = items.Select(x =>
+            {
+                var product = _fixture.Create<Product>();
+                product.Sku = x.Sku;
+
+                _products.Add(product);
+
+                return product;
+            }).ToArray();
+
+            Import();
+
+            foreach (var productToRemove in productsToRemove)
+            {
+                var capturedProduct = productToRemove;
+                _productSet.Verify(x => x.Remove(capturedProduct), Times.Once);
+            }
         }
     }
 }

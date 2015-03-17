@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using LeertjeVanRommelen.Dal;
@@ -17,9 +18,22 @@ namespace LeertjeVanRommelen.Bll
         public void Import(IInventoryImportDataSource importDataSource)
         {
             var productsToImport = importDataSource.GetInventoryDataToImport()
-                .Select(MapProduct);
+                .Select(MapProduct)
+                .ToArray();
+
+            var skusToRemove = productsToImport.Select(x => x.Sku).ToArray();
+            RemoveProductsWithSkus(skusToRemove);
 
             _products.AddRange(productsToImport);
+        }
+
+        private void RemoveProductsWithSkus(IEnumerable<string> skusToRemove)
+        {
+            var productsToRemove = _products.Where(x => skusToRemove.Contains(x.Sku));
+            foreach (var productToRemove in productsToRemove)
+            {
+                _products.Remove(productToRemove);
+            }
         }
 
         private Product MapProduct(InventoryImportDataItem item)
