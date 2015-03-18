@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine">
+      <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="CsvHelper">
       <HintPath>..\packages\CsvHelper.2.11.1.1\lib\net40-client\CsvHelper.dll</HintPath>
     </Reference>
@@ -70,6 +73,9 @@
     <Compile Include="Bll\IInventoryImportDataSource.cs" />
     <Compile Include="Bll\Inventory.cs" />
     <Compile Include="Bll\InventoryFactory.cs" />
+    <Compile Include="Dal\SqlCompactInventoryContextFactory.cs" />
+    <Compile Include="Dal\ConnectionOwnedByContext.cs" />
+    <Compile Include="Dal\SqlInventoryContextFactory.cs" />
     <Compile Include="DataSources\InventoryImportDataSourceFactory.cs" />
     <Compile Include="Bll\InventoryImportException.cs" />
     <Compile Include="Bll\InventoryImportDataItem.cs" />
@@ -81,7 +87,6 @@
     <Compile Include="Dal\ICreateInventoryContext.cs" />
     <Compile Include="Dal\IInventoryContext.cs" />
     <Compile Include="Dal\InventoryContext.cs" />
-    <Compile Include="Dal\InventoryContextFactory.cs" />
     <Compile Include="Dal\InventoryDbInitializer.cs" />
     <Compile Include="Dal\Product.cs" />
     <Compile Include="Dal\Store.cs" />
@@ -89,6 +94,7 @@
     <Compile Include="DataSources\CsvFileInventoryImportDataSource.cs" />
     <Compile Include="DataSources\CsvRecord.cs" />
     <Compile Include="ILog.cs" />
+    <Compile Include="ProgramOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\InternalsVisibleToDryIocFactoryCompilerDynamicAssembly.cs" />
@@ -97,6 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="SampleData.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

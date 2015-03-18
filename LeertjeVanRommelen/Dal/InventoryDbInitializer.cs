@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace LeertjeVanRommelen.Dal
 {
-    internal class InventoryDbInitializer : DropCreateDatabaseAlways<InventoryContext>
+    internal class InventoryDbInitializer : CreateDatabaseIfNotExists<InventoryContext>
     {
         public override void InitializeDatabase(InventoryContext context)
         {
