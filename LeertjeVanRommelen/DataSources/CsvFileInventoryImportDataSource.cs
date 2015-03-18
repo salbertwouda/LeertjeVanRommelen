@@ -19,12 +19,6 @@ namespace LeertjeVanRommelen.DataSources
 
         public IEnumerable<InventoryImportDataItem> GetInventoryDataToImport()
         {
-            if (!_fileInfo.Exists)
-            {
-                Console.WriteLine("Warning: trying to import inventory but file not found {0}", _fileInfo.FullName);
-                return Enumerable.Empty<InventoryImportDataItem>();
-            }
-
             return ReadRecordsFromFile()
                 .Select(Map)
                 .ToArray();
@@ -33,13 +27,34 @@ namespace LeertjeVanRommelen.DataSources
         private IEnumerable<CsvRecord> ReadRecordsFromFile()
         {
             var csvConfiguration = new CsvConfiguration { Delimiter = ";" };
-            using (var fileReader = File.OpenText(_fileInfo.FullName))
-            using (var csvReader = new CsvReader(fileReader, csvConfiguration))
+
+            try
             {
-                while (csvReader.Read())
+                using (var fileReader = File.OpenText(_fileInfo.FullName))
+                using (var csvReader = new CsvReader(fileReader, csvConfiguration))
                 {
-                    yield return csvReader.GetRecord<CsvRecord>();
+                    return csvReader.GetRecords<CsvRecord>().ToArray();
                 }
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                throw new DataSourceUnavailableException(e, GetType().Name);
+            }
+            catch (PathTooLongException e)
+            {
+                throw new DataSourceUnavailableException(e, GetType().Name);
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                throw new DataSourceUnavailableException(e, GetType().Name);
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new DataSourceUnavailableException(e, GetType().Name);
+            }
+            catch (NotSupportedException e)
+            {
+                throw new DataSourceUnavailableException(e, GetType().Name);
             }
         }
 

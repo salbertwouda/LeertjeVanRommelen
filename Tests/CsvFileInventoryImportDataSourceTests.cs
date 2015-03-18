@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using LeertjeVanRommelen.Bll;
 using LeertjeVanRommelen.DataSources;
 using NUnit.Framework;
 
@@ -52,9 +53,7 @@ Sku;Name;PrIce;ShortDescription;FullDescription;Brand;Model;VAT;ModelNumber;Colo
         [Test]
         public void WhenFileDoesNotExist_ThenReturnEmptyEnumerable()
         {
-            var result = _subject.GetInventoryDataToImport();
-
-            Assert.IsFalse(result.Any());
+            Assert.Throws<DataSourceUnavailableException>(() => _subject.GetInventoryDataToImport());
         }
     }
 }

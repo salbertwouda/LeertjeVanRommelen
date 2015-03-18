@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
+using LeertjeVanRommelen;
 using LeertjeVanRommelen.Bll;
 using LeertjeVanRommelen.Dal;
 using Moq;
@@ -41,8 +42,9 @@ namespace Tests
             _importData= new List<InventoryImportDataItem>();
             _importDataSource = new Mock<IInventoryImportDataSource>();
             _importDataSource.Setup(x => x.GetInventoryDataToImport()).Returns(_importData);
-            
-            _subject = new Inventory(_productSet.Object, _vats);
+
+            var log = new Mock<ILog>();
+            _subject = new Inventory(_productSet.Object, _vats, log.Object);
         }
 
         public SetDefaultDataTestCase[] GetSetDefaultDataTestCases()
@@ -180,7 +182,7 @@ namespace Tests
             const int vatId = int.MaxValue;
             _vats.Add(new VAT
             {
-                Id=vatId,
+                Id = vatId,
                 Percentage = percentage
             });
 
@@ -190,6 +192,14 @@ namespace Tests
             Import();
 
             AssertAddProductOnce(x => x.VATId == vatId);
+        }
+
+        [Test]
+        public void WhenRetrievingImportItemsThrowsDataSourceUnavailableException_ThenWrapInInventoryImportException()
+        {
+            _importDataSource.Setup(x => x.GetInventoryDataToImport()).Throws<DataSourceUnavailableException>();
+
+            Assert.Throws<InventoryImportException>(Import);
         }
     }
 }

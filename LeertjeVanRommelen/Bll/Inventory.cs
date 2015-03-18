@@ -9,18 +9,19 @@ namespace LeertjeVanRommelen.Bll
     internal class Inventory : IImportInventory
     {
         private readonly IDbSet<Product> _products;
+        private readonly ILog _log;
         private readonly Lazy<Dictionary<int, VAT>> _vatsByPercentage;
 
-        public Inventory(IDbSet<Product> products, IEnumerable<VAT> vats)
+        public Inventory(IDbSet<Product> products, IEnumerable<VAT> vats, ILog log)
         {
             _products = products;
+            _log = log;
             _vatsByPercentage = new Lazy<Dictionary<int, VAT>>(() => vats.ToDictionary(x => x.Percentage));
         }
 
         public void Import(IInventoryImportDataSource importDataSource)
         {
-            var inventoryItemsToImport = importDataSource.GetInventoryDataToImport().ToArray();
-
+            var inventoryItemsToImport = GetInventoryItemsToImport(importDataSource);
 
             var productsToImport = inventoryItemsToImport
                 .Select(MapProduct)
@@ -29,15 +30,32 @@ namespace LeertjeVanRommelen.Bll
             var skusToRemove = productsToImport.Select(x => x.Sku).ToArray();
             RemoveProductsWithSkus(skusToRemove);
 
-            Console.WriteLine("Importing {0} new products", productsToImport.Count());
+            AddProducts(productsToImport);
+        }
+
+        private void AddProducts(Product[] productsToImport)
+        {
+            _log.Info("Importing {0} new products", productsToImport.Count());
             _products.AddRange(productsToImport);
+        }
+
+        private IEnumerable<InventoryImportDataItem> GetInventoryItemsToImport(IInventoryImportDataSource importDataSource)
+        {
+            try
+            {
+                return importDataSource.GetInventoryDataToImport();
+            }
+            catch (DataSourceUnavailableException e)
+            {
+                throw new InventoryImportException("DataSource threw an exception", e);
+            }
         }
 
         private void RemoveProductsWithSkus(IEnumerable<string> skusToRemove)
         {
             var productsToRemove = _products.Where(x => skusToRemove.Contains(x.Sku));
             
-            Console.WriteLine("Deleting {0} old products", productsToRemove.Count());
+            _log.Info("Deleting {0} old products", productsToRemove.Count());
 
             foreach (var productToRemove in productsToRemove)
             {

@@ -37,6 +37,9 @@
     <Reference Include="CsvHelper">
       <HintPath>..\packages\CsvHelper.2.11.1.1\lib\net40-client\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="DryIoc">
+      <HintPath>..\packages\DryIoc.dll.1.4.1\lib\net40\DryIoc.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -60,23 +63,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bll\DataSourceUnavailableException.cs" />
+    <Compile Include="Bll\ICreateInventoryImportDataSource.cs" />
+    <Compile Include="Bll\ICreateInventoryImporter.cs" />
     <Compile Include="Bll\IImportInventory.cs" />
     <Compile Include="Bll\IInventoryImportDataSource.cs" />
     <Compile Include="Bll\Inventory.cs" />
+    <Compile Include="Bll\InventoryFactory.cs" />
+    <Compile Include="DataSources\InventoryImportDataSourceFactory.cs" />
+    <Compile Include="Bll\InventoryImportException.cs" />
     <Compile Include="Bll\InventoryImportDataItem.cs" />
+    <Compile Include="ConsoleLog.cs" />
     <Compile Include="Dal\Category.cs" />
     <Compile Include="Dal\DbSetExtensions.cs" />
     <Compile Include="Dal\Entity.cs" />
     <Compile Include="Dal\File.cs" />
+    <Compile Include="Dal\ICreateInventoryContext.cs" />
+    <Compile Include="Dal\IInventoryContext.cs" />
     <Compile Include="Dal\InventoryContext.cs" />
+    <Compile Include="Dal\InventoryContextFactory.cs" />
     <Compile Include="Dal\InventoryDbInitializer.cs" />
     <Compile Include="Dal\Product.cs" />
     <Compile Include="Dal\Store.cs" />
     <Compile Include="Dal\VAT.cs" />
     <Compile Include="DataSources\CsvFileInventoryImportDataSource.cs" />
     <Compile Include="DataSources\CsvRecord.cs" />
+    <Compile Include="ILog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\InternalsVisibleToDryIocFactoryCompilerDynamicAssembly.cs" />
+    <Compile Include="Services\InventoryService.cs" />
+    <Compile Include="Services\IServiceInventoryImportFromCsvFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
